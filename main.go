@@ -1,16 +1,21 @@
 package main
 
-import "github.com/mikeboyle/go-hangman/models"
+import (
+  "flag"
+
+  "github.com/mikeboyle/go-hangman/models"
+)
 
 func main() {
-  g := models.Game{
-    State: models.NewGameState("jackpot", 6),
-    Board: models.NewBoard("_"),
-    GuessInput: models.NewGuessInput(),
+  guesses := flag.Int("guesses", 8, "Max number of wrong guesses allowed")
+  blank := flag.String("blank", "_", "Character used to show a blank letter in the secret word")
+
+  flag.Parse()
+
+  gr := models.GameRunner{
+    MaxWrongGuesses: *guesses,
+    BlankChar: *blank,
   }
 
-  for !g.IsOver() {
-    guess, _ := g.GetGuess()
-    g.HandleGuess(guess)
-  }
+  gr.Play()
 }
