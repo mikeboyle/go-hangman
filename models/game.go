@@ -14,7 +14,9 @@ type GameStateInterface interface {
 
 type BoardInterface interface {
   RenderKey(string, []string)
+  RenderGuessResult(guess string, correct, won, lost bool)
   RenderGuessStatus([]string, int)
+  RenderWonLost(key string, isWon, isLost bool)
 }
 
 type GuessInputInterface interface {
@@ -25,18 +27,6 @@ type Game struct {
   State GameStateInterface
   Board BoardInterface
   GuessInput GuessInputInterface
-}
-
-func (g *Game) RenderKey() {
-  gs := g.State
-  g.Board.RenderKey(gs.Key(), gs.CorrectGuesses())
-}
-
-func (g *Game) RenderGuessStatus() {
-  gs := g.State
-  wrongGuesses := gs.WrongGuesses()
-  remaining := gs.MaxWrongGuesses() - len(wrongGuesses)
-  g.Board.RenderGuessStatus(wrongGuesses, remaining)
 }
 
 func (g *Game) GetGuess() (string, error) {
@@ -56,20 +46,31 @@ func (g *Game) HandleGuess(guess string) error {
     return err
   }
 
-  fmt.Printf("You guessed: %v\n", guess)
-  fmt.Printf("Correct: %v\n", isCorrect)
-  g.RenderKey()
-  if gs.IsWon() {
-    fmt.Println("You won!")
-    return nil
-  }
-
-  if gs.IsLost() {
-    fmt.Println("You lost...")
-    fmt.Printf("The secret word was %v.\n", gs.Key())
-    return nil
-  }
-
-  g.RenderGuessStatus()
+  g.renderGuessResult(guess, isCorrect)
+  g.renderKey()
+  g.renderWonLost()
+  g.renderGuessStatus()
   return nil
+}
+
+func (g *Game) renderKey() {
+  gs := g.State
+  g.Board.RenderKey(gs.Key(), gs.CorrectGuesses())
+}
+
+func (g *Game) renderGuessResult(guess string, correct bool) {
+  gs := g.State
+  g.Board.RenderGuessResult(guess, correct, gs.IsWon(), gs.IsLost())
+}
+
+func (g *Game) renderGuessStatus() {
+  gs := g.State
+  wrongGuesses := gs.WrongGuesses()
+  remaining := gs.MaxWrongGuesses() - len(wrongGuesses)
+  g.Board.RenderGuessStatus(wrongGuesses, remaining)
+}
+
+func (g *Game) renderWonLost() {
+  gs := g.State
+  g.Board.RenderWonLost(gs.Key(), gs.IsWon(), gs.IsLost())
 }
