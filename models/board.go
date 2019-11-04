@@ -2,6 +2,7 @@ package models
 
 import (
   "fmt"
+  "strings"
   "github.com/mikeboyle/go-hangman/utils"
 )
 
@@ -14,7 +15,7 @@ func (b Board) RenderKey(key string, correctGuesses []string) {
   for _, c := range key {
     letter := string(c)
     if utils.Contains(correctGuesses, string(c)) {
-      rendered += letter
+      rendered += strings.ToUpper(letter)
     } else {
       rendered += b.BlankChar
     }

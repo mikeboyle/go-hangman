@@ -13,16 +13,13 @@ type GameState struct {
   correctGuesses []string
 }
 
-func NewGameState (key string, maxWrongGuesses int) (*GameState, error) {
-  // TODO: validate maxWrongGuesses >= num of unique letters in string
-  g := GameState{
+func NewGameState (key string, maxWrongGuesses int) *GameState {
+  return &GameState{
     key: key,
     maxWrongGuesses: maxWrongGuesses,
     wrongGuesses: []string{},
     correctGuesses: []string{},
   }
-
-  return &g, nil
 }
 
 func (g *GameState) Key() string {
@@ -41,6 +38,21 @@ func (g *GameState) CorrectGuesses() []string {
   return g.correctGuesses
 }
 
+// IsLost checks if there are no more Guesses
+func (g *GameState) IsLost() bool {
+  return len(g.wrongGuesses) >= g.maxWrongGuesses
+}
+
+// IsWon checks if the user has guessed the word
+func (g *GameState) IsWon() bool {
+  for _, c := range g.key {
+    if !utils.Contains(g.correctGuesses, string(c)) {
+      return false
+    }
+  }
+  return true
+}
+
 // AddGuess adds a guess to the array and updates the game status.
 // Returns true if guess was correct, else false
 func (g *GameState) AddGuess(guess string) (bool, error) {
@@ -56,7 +68,7 @@ func (g *GameState) AddGuess(guess string) (bool, error) {
     return false, fmt.Errorf("%v has already been guessed", guess)
   }
 
-  isCorrect := g.handleAddGuess(guess)
+  isCorrect := g.handleAddGuess(strings.ToUpper(guess))
   return isCorrect, nil
 }
 
@@ -68,21 +80,6 @@ func (g *GameState) handleAddGuess(guess string) bool {
 
   g.wrongGuesses = append(g.wrongGuesses, guess)
   return false
-}
-
-// IsLost checks if there are no more Guesses
-func (g *GameState) IsLost() bool {
-  return len(g.wrongGuesses) >= g.maxWrongGuesses
-}
-
-// IsWon checks if the user has guessed the word
-func (g *GameState) IsWon() bool {
-  for _, c := range g.key {
-    if !utils.Contains(g.correctGuesses, string(c)) {
-      return false
-    }
-  }
-  return true
 }
 
 func stringContains(str, item string) bool {

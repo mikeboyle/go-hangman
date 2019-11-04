@@ -3,12 +3,10 @@ package main
 import "github.com/mikeboyle/go-hangman/models"
 
 func main() {
-  gs, _ := models.NewGameState("jackpot", 6)
-  i := models.NewGuessInput()
   g := models.Game{
-    State: gs,
+    State: models.NewGameState("jackpot", 6),
     Board: models.Board{ BlankChar: "_"},
-    GuessInput: i,
+    GuessInput: models.NewGuessInput(),
   }
 
   for !g.IsOver() {
